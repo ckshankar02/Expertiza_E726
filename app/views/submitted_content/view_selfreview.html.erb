@@ -1,0 +1,32 @@
+<!-- E726 Change Begin -->
+<!-- Shows the questions related to the selfreview questionnaire along with the weights -->
+<h2>Self Review</h2>
+
+<% questionnaire=params[:id]
+questions = Question.find_all_by_questionnaire_id(questionnaire) %>
+
+<% form_tag do %>
+<% questions.each do | question | %>
+        <%= question.txt %>
+        <% if !question.true_false? %>
+        <select>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <% end %>
+        <BR/><BR/>
+<% end %>
+
+<p>
+  <label for="review_comments">Additional Comments</label><BR/>
+  <textarea cols="70" rows="1" id="review_comments" name="review[comments]"  style="overflow:hidden;" ></textarea>
+</p>
+
+<br/>
+<%= submit_tag "Save", :name=>"save" %>
+
+<% end %>
+<!-- E726 Change End -->
