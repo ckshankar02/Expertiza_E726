@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121021053035) do
+ActiveRecord::Schema.define(:version => 20121117002113) do
 
   create_table "assignment_questionnaires", :force => true do |t|
     t.integer "assignment_id"
@@ -55,6 +55,7 @@ ActiveRecord::Schema.define(:version => 20121021053035) do
     t.boolean  "availability_flag"
     t.integer  "managerreview_questionnaire_id"
     t.integer  "readerreview_questionnaire_id"
+    t.integer  "selfreview_questionnaire_id"
   end
 
   add_index "assignments", ["course_id"], :name => "fk_assignments_courses"
@@ -460,35 +461,24 @@ ActiveRecord::Schema.define(:version => 20121021053035) do
   add_index "ta_mappings", ["course_id"], :name => "fk_ta_mappings_course_id"
   add_index "ta_mappings", ["ta_id"], :name => "fk_ta_mappings_ta_id"
 
-  create_table "team_member_roles", :force => true do |t|
-    t.integer  "assignment_role_id"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "team_member_roles", ["assignment_role_id"], :name => "idx_tmr_assignment_role_id"
-  add_index "team_member_roles", ["user_id"], :name => "idx_tmr_user_id"
-
-  create_table "team_role_assignments", :force => true do |t|
-    t.integer  "role_id"
-    t.integer  "assignment_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "team_role_assignments", ["assignment_id"], :name => "idx_tra_assignment_id"
-  add_index "team_role_assignments", ["role_id"], :name => "idx_tra_role_id"
-
   create_table "team_roles", :force => true do |t|
-    t.string   "role_names"
-    t.integer  "creator_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "role_questionnaire_id"
+    t.string  "role_names"
+    t.integer "questionnaire_id"
   end
 
-  add_index "team_roles", ["creator_id"], :name => "fk_team_roles_creator_id"
+  add_index "team_roles", ["questionnaire_id"], :name => "fk_team_roles_questionnaire"
+
+  create_table "team_rolesets", :force => true do |t|
+    t.string "roleset_name"
+  end
+
+  create_table "teamrole_assignment", :force => true do |t|
+    t.integer "team_roleset_id"
+    t.integer "assignment_id"
+  end
+
+  add_index "teamrole_assignment", ["assignment_id"], :name => "fk_teamrole_assignment_assignments"
+  add_index "teamrole_assignment", ["team_roleset_id"], :name => "fk_teamrole_assignment_team_rolesets"
 
   create_table "teams", :force => true do |t|
     t.string  "name"
