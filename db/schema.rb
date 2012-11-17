@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111217162506) do
+ActiveRecord::Schema.define(:version => 20121021053035) do
 
   create_table "assignment_questionnaires", :force => true do |t|
     t.integer "assignment_id"
@@ -53,6 +53,8 @@ ActiveRecord::Schema.define(:version => 20111217162506) do
     t.integer  "max_reviews_per_submission"
     t.integer  "review_topic_threshold",            :default => 0
     t.boolean  "availability_flag"
+    t.integer  "managerreview_questionnaire_id"
+    t.integer  "readerreview_questionnaire_id"
   end
 
   add_index "assignments", ["course_id"], :name => "fk_assignments_courses"
@@ -457,6 +459,36 @@ ActiveRecord::Schema.define(:version => 20111217162506) do
 
   add_index "ta_mappings", ["course_id"], :name => "fk_ta_mappings_course_id"
   add_index "ta_mappings", ["ta_id"], :name => "fk_ta_mappings_ta_id"
+
+  create_table "team_member_roles", :force => true do |t|
+    t.integer  "assignment_role_id"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "team_member_roles", ["assignment_role_id"], :name => "idx_tmr_assignment_role_id"
+  add_index "team_member_roles", ["user_id"], :name => "idx_tmr_user_id"
+
+  create_table "team_role_assignments", :force => true do |t|
+    t.integer  "role_id"
+    t.integer  "assignment_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "team_role_assignments", ["assignment_id"], :name => "idx_tra_assignment_id"
+  add_index "team_role_assignments", ["role_id"], :name => "idx_tra_role_id"
+
+  create_table "team_roles", :force => true do |t|
+    t.string   "role_names"
+    t.integer  "creator_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "role_questionnaire_id"
+  end
+
+  add_index "team_roles", ["creator_id"], :name => "fk_team_roles_creator_id"
 
   create_table "teams", :force => true do |t|
     t.string  "name"
