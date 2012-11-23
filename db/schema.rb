@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121117002113) do
+ActiveRecord::Schema.define(:version => 20121117003355) do
 
   create_table "assignment_questionnaires", :force => true do |t|
     t.integer "assignment_id"
@@ -53,9 +53,9 @@ ActiveRecord::Schema.define(:version => 20121117002113) do
     t.integer  "max_reviews_per_submission"
     t.integer  "review_topic_threshold",            :default => 0
     t.boolean  "availability_flag"
+    t.integer  "selfreview_questionnaire_id"
     t.integer  "managerreview_questionnaire_id"
     t.integer  "readerreview_questionnaire_id"
-    t.integer  "selfreview_questionnaire_id"
   end
 
   add_index "assignments", ["course_id"], :name => "fk_assignments_courses"
@@ -204,6 +204,16 @@ ActiveRecord::Schema.define(:version => 20121117002113) do
     t.string  "type"
   end
 
+  create_table "participant_team_roles", :force => true do |t|
+    t.integer  "role_assignment_id"
+    t.integer  "participant_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "participant_team_roles", ["participant_id"], :name => "fk_participant_id"
+  add_index "participant_team_roles", ["role_assignment_id"], :name => "fk_role_assignment_id"
+
   create_table "participants", :force => true do |t|
     t.boolean  "submit_allowed",       :default => true
     t.boolean  "review_allowed",       :default => true
@@ -220,6 +230,7 @@ ActiveRecord::Schema.define(:version => 20121117002113) do
     t.integer  "topic_id"
     t.datetime "time_stamp"
     t.text     "digital_signature"
+    t.string   "special_role"
   end
 
   add_index "participants", ["user_id"], :name => "fk_participant_users"
@@ -461,6 +472,16 @@ ActiveRecord::Schema.define(:version => 20121117002113) do
   add_index "ta_mappings", ["course_id"], :name => "fk_ta_mappings_course_id"
   add_index "ta_mappings", ["ta_id"], :name => "fk_ta_mappings_ta_id"
 
+  create_table "team_role_questionnaire", :force => true do |t|
+    t.integer  "team_roles_id"
+    t.integer  "questionnaire_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "team_role_questionnaire", ["questionnaire_id"], :name => "fk_questionnaire_id"
+  add_index "team_role_questionnaire", ["team_roles_id"], :name => "fk_team_roles_id"
+
   create_table "team_roles", :force => true do |t|
     t.string  "role_names"
     t.integer "questionnaire_id"
@@ -471,6 +492,16 @@ ActiveRecord::Schema.define(:version => 20121117002113) do
   create_table "team_rolesets", :force => true do |t|
     t.string "roleset_name"
   end
+
+  create_table "team_rolesets_maps", :force => true do |t|
+    t.integer  "team_rolesets_id"
+    t.integer  "team_role_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "team_rolesets_maps", ["team_role_id"], :name => "fk_team_role_id"
+  add_index "team_rolesets_maps", ["team_rolesets_id"], :name => "fk_team_rolesets_id"
 
   create_table "teamrole_assignment", :force => true do |t|
     t.integer "team_roleset_id"

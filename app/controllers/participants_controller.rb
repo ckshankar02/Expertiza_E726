@@ -5,10 +5,14 @@ class ParticipantsController < ApplicationController
     @root_node = Object.const_get(params[:model]+"Node").find_by_node_object_id(params[:id])     
     @parent = Object.const_get(params[:model]).find(params[:id])
     @participants = @parent.participants  
-    @model = params[:model]    
+    @model = params[:model]
+    # E726 Fall2012 Changes Begin
+    @special_role = params[:special_role]
+    # E726 Fall2012 Changes End
   end
   
-  def add   
+  def add
+
     curr_object = Object.const_get(params[:model]).find(params[:id])    
     begin
       curr_object.add_participant(params[:user][:name])
@@ -16,6 +20,13 @@ class ParticipantsController < ApplicationController
       url_new_user = url_for :controller => 'users', :action => 'new'
       flash[:error] = "User #{params[:user][:name]} does not exist. Would you like to <a href = '#{url_new_user}'>create this user?</a>"
     end
+
+    # E726 Fall2012 Changes Begin
+    participant = Participant.find_by_parent_id_and_handle(params[:id],params[:user][:name])
+    participant.special_role = params[:special_role].to_s
+    participant.save
+    # E726 Fall2012 Changes End
+
     redirect_to :action => 'list', :id => curr_object.id, :model => params[:model]
   end
      
