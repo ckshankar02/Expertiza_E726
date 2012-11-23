@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111217162506) do
+ActiveRecord::Schema.define(:version => 20121117002113) do
 
   create_table "assignment_questionnaires", :force => true do |t|
     t.integer "assignment_id"
@@ -53,6 +53,9 @@ ActiveRecord::Schema.define(:version => 20111217162506) do
     t.integer  "max_reviews_per_submission"
     t.integer  "review_topic_threshold",            :default => 0
     t.boolean  "availability_flag"
+    t.integer  "managerreview_questionnaire_id"
+    t.integer  "readerreview_questionnaire_id"
+    t.integer  "selfreview_questionnaire_id"
   end
 
   add_index "assignments", ["course_id"], :name => "fk_assignments_courses"
@@ -457,6 +460,25 @@ ActiveRecord::Schema.define(:version => 20111217162506) do
 
   add_index "ta_mappings", ["course_id"], :name => "fk_ta_mappings_course_id"
   add_index "ta_mappings", ["ta_id"], :name => "fk_ta_mappings_ta_id"
+
+  create_table "team_roles", :force => true do |t|
+    t.string  "role_names"
+    t.integer "questionnaire_id"
+  end
+
+  add_index "team_roles", ["questionnaire_id"], :name => "fk_team_roles_questionnaire"
+
+  create_table "team_rolesets", :force => true do |t|
+    t.string "roleset_name"
+  end
+
+  create_table "teamrole_assignment", :force => true do |t|
+    t.integer "team_roleset_id"
+    t.integer "assignment_id"
+  end
+
+  add_index "teamrole_assignment", ["assignment_id"], :name => "fk_teamrole_assignment_assignments"
+  add_index "teamrole_assignment", ["team_roleset_id"], :name => "fk_teamrole_assignment_team_rolesets"
 
   create_table "teams", :force => true do |t|
     t.string  "name"
