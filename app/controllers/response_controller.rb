@@ -274,7 +274,7 @@ class ResponseController < ApplicationController
     @map = ResponseMap.find(params[:id])
     @return = params[:return]
     @modified_object = @map.id
-    get_content  
+    get_content
     #**********************
     # Check whether this is a custom rubric
     if @map.questionnaire.section.eql? "Custom"
@@ -335,8 +335,22 @@ class ResponseController < ApplicationController
       end
       @response = Response.create(:map_id => @map.id, :additional_comment => params[:review][:comments],:version_num=>@version)
       @res = @response.id
-      @questionnaire = @map.questionnaire
-      questions = @questionnaire.questions     
+
+      # E726 Fall2012 Changes Begin
+      @assignment = @map.assignment
+      @participant = @map.reviewer
+      if @participant.special_role == "Reader"
+        @questionnaire = Questionnaire.find(@assignment.readerreview_questionnaire_id)
+        questions = Question.find_all_by_questionnaire_id(@assignment.readerreview_questionnaire_id)
+      elsif @participant.special_role == "Manager"
+        @questionnaire = Questionnaire.find(@assignment.managerreview_questionnaire_id)
+        questions = Question.find_all_by_questionnaire_id(@assignment.managerreview_questionnaire_id)
+      else
+        @questionnaire = @map.questionnaire
+        questions = @questionnaire.questions
+      end
+      # E726 Fall2012 Changes End
+
       params[:responses].each_pair do |k,v|
         score = Score.create(:response_id => @response.id, :question_id => questions[k.to_i].id, :score => v[:score], :comments => v[:comment])
       end  
@@ -408,10 +422,20 @@ class ResponseController < ApplicationController
     @assignment = @map.assignment
     @participant = @map.reviewer
     @contributor = @map.contributor
-    @questionnaire = @map.questionnaire
-    @questions = @questionnaire.questions
+    # E726 Fall2012 Changes Begin
+    if @participant.special_role == "Reader"
+      @questionnaire = Questionnaire.find(@assignment.readerreview_questionnaire_id)
+      @questions = Question.find_all_by_questionnaire_id(@assignment.readerreview_questionnaire_id)
+    elsif @participant.special_role == "Manager"
+      @questionnaire = Questionnaire.find(@assignment.managerreview_questionnaire_id)
+      @questions = Question.find_all_by_questionnaire_id(@assignment.managerreview_questionnaire_id)
+    else
+      @questionnaire = @map.questionnaire
+      @questions = @questionnaire.questions
+    end
+    # E726 Fall2012 Changes End
     @min = @questionnaire.min_question_score
-    @max = @questionnaire.max_question_score     
+    @max = @questionnaire.max_question_score
   end
   
   def redirect_when_disallowed(response)
