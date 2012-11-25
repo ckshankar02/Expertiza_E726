@@ -1,32 +1,111 @@
 <!-- E726 Change Begin -->
 <!-- Shows the questions related to the selfreview questionnaire along with the weights -->
 <h2>Self Review</h2>
-
 <% questionnaire=params[:id]
 questions = Question.find_all_by_questionnaire_id(questionnaire) %>
-
-<% form_tag do %>
+<% if params[:action_name] == 'Begin' %>
+<% form_tag :controller => 'response', :action => 'selfreview_create',
+            :locals => {:questions => questions, :assignment_id => params[:assignment_id],
+                        :user_id => params[:user_id]} do %>
+    <% i = 0
+    scores = Array.new %>
 <% questions.each do | question | %>
         <%= question.txt %>
+        <br/>
+        <textarea cols="70" rows="1" id="responses_<%=i%>_comments" name="responses[<%=i%>][comment]"
+                  style="overflow:hidden;" onkeyup="checkRows(this)" ></textarea>
         <% if !question.true_false? %>
-        <select>
+        <select name="responses[<%=i%>][score]">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
         </select>
+        <% else %>
+            <select name="responses[<%=i%>][score]">
+            <option value="0">0</option>
+            <option value="5">5</option>
+            </select>
         <% end %>
+        <% i+=1 %>
         <BR/><BR/>
 <% end %>
 
 <p>
   <label for="review_comments">Additional Comments</label><BR/>
-  <textarea cols="70" rows="1" id="review_comments" name="review[comments]"  style="overflow:hidden;" ></textarea>
+  <textarea cols="70" rows="1" id="review_comments1" name="review[comments]"  style="overflow:hidden;" ></textarea>
 </p>
 
 <br/>
 <%= submit_tag "Save", :name=>"save" %>
+<% end %> <!-- End of form tag -->
+
+<% elsif params[:action_name] == 'Edit' %>
+    <% form_tag :controller => 'response', :action => 'selfreview_update',
+                :locals => {:questions => questions, :assignment_id => params[:assignment_id],
+                            :user_id => params[:user_id], :response_map_id => params[:response_map_id] } do %>
+    <% i = 0 %>
+    <% response_id = Response.find_by_map_id(params[:response_map_id])
+       scores = Score.find_all_by_response_id(response_id.id) %>
+    <% questions.each do | question | %>
+        <%= question.txt %>
+        <br/>
+
+        <textarea cols="70" rows="1" id="responses_<%=i%>_comments" name="responses[<%=i%>][comment]"
+                  style="overflow:hidden;" onkeyup="checkRows(this)" ><%= scores[i].comments %></textarea>
+            <% if !question.true_false? %>
+                <select name="responses[<%=i%>][score]">
+                  <option value="1" <% if scores[i].score == 1 %>selected=""<% end %>>1</option>
+                  <option value="2" <% if scores[i].score == 2 %>selected=""<% end %>>2</option>
+                  <option value="3" <% if scores[i].score == 3 %>selected=""<% end %>>3</option>
+                  <option value="4" <% if scores[i].score == 4 %>selected=""<% end %>>4</option>
+                  <option value="5" <% if scores[i].score == 5 %>selected=""<% end %>>5</option>
+                </select>
+            <% else %>
+                <select name="responses[<%=i%>][score]">
+                  <option value="0" <% if scores[i].score == 0 %>selected=""<% end %>>0</option>
+                  <option value="5" <% if scores[i].score == 5 %>selected=""<% end %>>5</option>
+                </select>
+            <% end %>
+        <% i+=1 %>
+        <BR/><BR/>
+    <% end %>
+
+    <p>
+      <label for="review_comments">Additional Comments</label><BR/>
+      <textarea cols="70" rows="1" id="review_comments3" name="review[comments]"
+                style="overflow:hidden;" ><%= response_id.additional_comment %></textarea>
+    </p>
+
+    <br/>
+    <%= submit_tag "Update", :name=>"update" %>
+    <% end %>
+<% else %> <!-- View Part -->
+        <% i = 0 %>
+        <% response_id = Response.find_by_map_id(params[:response_map_id])
+           scores = Score.find_all_by_response_id(response_id.id) %>
+        <% questions.each do | question | %>
+            <%= question.txt %>
+            <br/>
+
+            <textarea cols="70" rows="1" id="responses_<%=i%>_comments" name="responses[<%=i%>][comment]" disabled=""
+                      style="overflow:hidden;" onkeyup="checkRows(this)" ><%= scores[i].comments %></textarea>
+            <br/><b>Score: </b> <%= scores[i].score %>
+            <% i+=1 %>
+            <BR/><BR/>
+        <% end %>
+
+        <p>
+          <label for="review_comments">Additional Comments</label><BR/>
+          <textarea cols="70" rows="1" id="review_comments2" name="review[comments]"
+                    style="overflow:hidden;" disabled="" ><%= response_id.additional_comment %></textarea>
+        </p>
+
+        <br/>
 
 <% end %>
+
+<br/>
+<a href="javascript:window.history.back()">Back</a>
 <!-- E726 Change End -->

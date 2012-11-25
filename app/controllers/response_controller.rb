@@ -301,7 +301,7 @@ class ResponseController < ApplicationController
     end
    end
   
-  def create     
+  def create
     @map = ResponseMap.find(params[:id])
     @res = 0
     msg = ""
@@ -333,7 +333,7 @@ class ResponseController < ApplicationController
       else
           @version=1
       end
-      @response = Response.create(:map_id => @map.id, :additional_comment => params[:review][:comments],:version_num=>@version)
+        @response = Response.create(:map_id => @map.id, :additional_comment => params[:review][:comments],:version_num=>@version)
       @res = @response.id
 
       # E726 Fall2012 Changes Begin
@@ -368,8 +368,40 @@ class ResponseController < ApplicationController
       error_msg = "Your response was not saved. Cause: " + $!
     end
     redirect_to :controller => 'response', :action => 'saving', :id => @map.id, :return => params[:return], :msg => msg, :error_msg => error_msg
-  end      
-  
+  end
+
+  #E726 Fall2012 Changes Begin
+  def selfreview_create
+    id=ResponseMap.create(:reviewed_object_id => params[:locals][:assignment_id], :reviewer_id => params[:locals][:user_id],
+                       :reviewee_id => params[:locals][:user_id], :type => "SelfReviewResponseMap")
+    @map = ResponseMap.find(id)
+    @response = Response.create(:map_id => @map.id, :additional_comment => params[:review][:comments])
+    for i in 0..params[:locals][:questions].size-1
+      # Local variable score is unused; can it be removed?
+      score = Score.create(:response_id => @response.id, :question_id => params[:locals][:questions][i],
+                           :score => params[:responses][i.to_s][:score].to_i, :comments => params[:responses][i.to_s][:comment])
+    end
+    msg = "Self Review was successfully saved."
+    redirect_to :controller => 'submitted_content', :action => 'edit', :id => @map.reviewer.id
+  end
+
+  def selfreview_update
+    response_id = Response.find_by_map_id(params[:locals][:response_map_id])
+    response_id.update_attribute('additional_comment', params[:review][:comments])
+
+    scores = Score.find_all_by_response_id(response_id.id)
+
+    for i in 0..scores.size-1
+      scores[i].update_attribute('score', params[:responses][i.to_s][:score].to_i)
+      scores[i].update_attribute('comments', params[:responses][i.to_s][:comment])
+    end
+
+    response_map = ResponseMap.find(params[:locals][:response_map_id])
+    redirect_to :controller => 'submitted_content', :action => 'edit', :id => response_map.reviewer_id
+  end
+
+  #E726 Fall2012 Changes End
+
   def custom_create
     @map = ResponseMap.find(params[:id])
     @response = Response.create(:map_id => @map.id, :additional_comment => "")
