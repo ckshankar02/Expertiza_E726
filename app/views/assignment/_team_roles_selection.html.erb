@@ -1,0 +1,75 @@
+<script type="text/javascript">
+function includeRolesets()
+{
+    getRolesetChkbx = document.getElementById("team_roleset_chkbx");
+    getRolesetDrpdwn = document.getElementById("team_roleset_drpdwn");
+    getRolesetHidden = document.getElementById("roleset_selection_status");
+    if(getRolesetChkbx.checked == true)
+    {
+        getRolesetDrpdwn.disabled = false;
+        getRolesetHidden.setValue("yes");
+    }
+    else
+    {
+        getRolesetDrpdwn.disabled = true;
+        getRolesetHidden.setValue("no");
+    }
+}
+function includeRoles()
+{
+    getRoleChkbx = document.getElementById("individual_role_chkbx");
+    getRoleDrpdwn = document.getElementById("team_role_drpdwn");
+    getRoleHidden = document.getElementById("role_selection_status");
+    if(getRoleChkbx.checked == true)
+    {
+        getRoleDrpdwn.disabled = false;
+        getRoleHidden.setValue("yes");
+    }
+    else
+    {
+        getRoleDrpdwn.disabled = true;
+        getRoleHidden.setValue("no");
+    }
+}
+</script>
+
+<br>
+
+<table id="team_role_table" <%if !@assignment.team_assignment %>style="display:none"<% end %>>
+<tr>
+  <td colspan="3"><h4>Team Member Roles</h4></td>
+</tr>
+<tr>
+  <td>
+    <input id="team_roleset_chkbx" type="checkbox" name="team_roleset_chkbx" onchange="includeRolesets()"> Select Rolesets
+  </td>
+  <td>
+    <select id="team_roleset_drpdwn" multiple="multiple" style="width:250px" name="team_rolesets[]" disabled="true">
+        <option value="0" selected ="selected">None</option>
+      <% if !@all_team_rolesets.nil? %>
+        <% @all_team_rolesets.each do |x| %>
+            <option value="<%= x.id%>"><%=x.roleset_name%></option>
+        <%end%>
+      <%end%>
+    </select>
+  </td>
+  <td><input type="hidden" id="roleset_selection_status" name="roleset_selection_status" value="no"></td>
+</tr>
+ <tr>
+   <td>
+     <input id="individual_role_chkbx" type="checkbox" name="individual_role_chkbxs" onchange="includeRoles()"> Select Individual Roles
+   </td>
+   <td>
+     <select id="team_role_drpdwn" multiple="multiple" style="width:250px" name="team_roles[]" disabled="true">
+       <option value="0" selected ="selected">None</option>
+       <% if !@all_team_roles.nil? %>
+        <% @all_team_roles.each do |x| %>
+               <option value="<%= x.id%>"><%=x.role_names%></option>
+        <%end%>
+       <%end%>
+     </select>
+   </td>
+   <td><input type="hidden" id="role_selection_status" name="role_selection_status" value="no"></td>
+ </tr>
+</table>
+<br>

@@ -1,0 +1,93 @@
+<script type="text/javascript">
+    function addRoles()
+    {
+        var team_role_list = new Array();
+        var team_role_id_list = new Array();
+        numRolesToAdd = parseInt(document.getElementById("numRolesToAdd").value);
+
+        if(numRolesToAdd >= 1)
+        {
+            <% if !@all_team_roles.nil?%>
+                k = 0
+                <% @all_team_roles.each do |x| %>
+                    team_role_list[k] = <%= x.role_names.to_json %>
+                    team_role_id_list[k] = <%= x.id.to_json %>
+                    k++
+                <%end%>
+
+                table = document.getElementById("role_list");
+                for(i=0; i<numRolesToAdd; i++)
+                {
+                    row = table.insertRow(-1);
+                    column = document.createElement("td");
+                    column.innerHTML = "Role "+(i+1)
+                    row.appendChild(column)
+                    column = document.createElement("td");
+                    innerselect = "<select id='role_select_"+ i +"' name='role_select["+ i +"]'>";
+
+                     for(j=0;j<k;j++)
+                     {
+                         innerselect = innerselect+"<option value ='"+team_role_id_list[j]+"'>"+team_role_list[j]+"</option>";
+                     }
+
+                     innerselect = innerselect+"</select><br>";
+                     column.innerHTML = innerselect;
+                     row.appendChild(column);
+                }
+            <%else%>
+                table = document.getElementById("role_list");
+                row = table.insertRow(-1);
+                column = document.createElement("td");
+                column.innerHTML = "No role has been created. Please create roles and try again!!"
+                row.appendChild(column);
+            <%end%>
+        }
+    }
+</script>
+
+<h3>Team Roleset Creation</h3>
+
+<!--
+
+<% form_for(@team_roleset) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :roleset_name %>:
+    <%= f.text_field :roleset_name %>
+  </p>
+
+
+  <p>
+    <%= f.submit 'Create Roleset' %>
+  </p>
+<% end %>
+-->
+
+<% form_tag :controller => 'team_rolesets', :action => 'create' do %>
+
+<table>
+  <tr>
+    <td><%= label_tag :roleset_name %>:</td>
+    <td><%= text_field_tag :roleset_name%></td>
+  </tr>
+  <tr>
+    <td>Number of Roles:</td>
+    <td><input id="numRolesToAdd" name="numRolesToAdd"  type="text" value="1" size=1>
+        <input type="button" value="Add Role" onclick="addRoles()"></td>
+  </tr>
+</table>
+    <br>
+    <br>
+<table id = "role_list">
+ <tr><td width=" 80px"></td><td></td></tr>
+</table>
+<br>
+<div>
+<%= submit_tag "Create Roleset"%>
+</div>
+
+
+<%end%>
+
+<%= link_to 'Back',:controller=> 'tree_display', :action=> 'list' %>

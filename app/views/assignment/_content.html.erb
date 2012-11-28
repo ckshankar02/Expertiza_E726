@@ -1,18 +1,32 @@
 <script type="text/javascript">
+
 function onChange(){
 	count = document.getElementById("team_count1");
 	hidden = document.getElementById("team_count2");
 	document.poppedLayer3 = eval('document.getElementById("teammate_review")');
+
+//******************* E726 Changes Starts Here **************************************
+    document.roleTable = eval('document.getElementById("team_role_table")');
+
+    test_val = document.getElementById("teamselect");
+//******************** E726 Changes Ends Here ***************************************
+
 	var dropdownIndex = document.getElementById('teamselect').selectedIndex;
 	var dropdownValue = document.getElementById('teamselect')[dropdownIndex].value;
 	if(dropdownValue == "true"){
 		count.style.display = "";
 		hidden.style.display = "none";
 		document.poppedLayer3.style.display = "";
+//******************** E726 Changes Starts Here **************************************
+        document.roleTable.style.display = "";
+//********************* E726 Changes Ends Here ***************************************
 	}else{
 		count.style.display = "none";
 		hidden.style.display  = "";
 		document.poppedLayer3.style.display = "none";
+        //******************** E726 Changes Starts Here **************************************
+        document.roleTable.style.display = "none";
+//********************* E726 Changes Ends Here ***************************************
 	}
 }
 

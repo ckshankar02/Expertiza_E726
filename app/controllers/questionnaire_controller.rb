@@ -150,6 +150,9 @@ class QuestionnaireController < ApplicationController
     @questionnaire.section = params[:questionnaire][:section]
     @questionnaire.id = params[:questionnaire][:id]
     @questionnaire.display_type = params[:questionnaire][:display_type]
+
+    @all_team_roles = TeamRole.all
+
   end
 
   # Save the new questionnaire to the database
@@ -160,6 +163,10 @@ class QuestionnaireController < ApplicationController
     else
       @questionnaire.instructor_id = session[:user].id
     end
+
+    @selected_role = params[:role_quest_select]
+    @role_selection_status = params[:role_selected]
+
     save_questionnaire
     redirect_to :controller => 'tree_display', :action => 'list'
   end
@@ -210,7 +217,14 @@ class QuestionnaireController < ApplicationController
       parent = FolderNode.find_by_node_object_id(pFolder.id)
       if QuestionnaireNode.find_by_parent_id_and_node_object_id(parent.id,@questionnaire.id) == nil
         QuestionnaireNode.create(:parent_id => parent.id, :node_object_id => @questionnaire.id)
-      end      
+      end
+      if @role_selection_status == "yes"
+        team_role_questionnaire_entry = TeamRoleQuestionnaire.new
+        team_role_questionnaire_entry.team_roles_id = @selected_role
+        team_role_questionnaire_entry.questionnaire_id = @questionnaire.id
+        team_role_questionnaire_entry.save
+      end
+
     rescue
       flash[:error] = $!
     end

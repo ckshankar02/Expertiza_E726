@@ -1,4 +1,5 @@
 class AssignmentController < ApplicationController
+
   auto_complete_for :user, :name
   before_filter :authorize
 
@@ -53,6 +54,12 @@ class AssignmentController < ApplicationController
     @private = params[:private] == true
     #calling the defalut values mathods
     get_limits_and_weights
+
+#**************** E726 Changes Starts Here *************************************
+    @all_team_rolesets = TeamRoleset.all
+    @all_team_roles = TeamRole.all
+#***************** E726 Changes Ends Here ***************************************
+
   end
 
 
@@ -87,6 +94,11 @@ class AssignmentController < ApplicationController
       params[:limits][:readerreview] = params[:limits][:review]
     end
     # E726 Fall2012 Changes End
+#******************************** E726 Changes Starts Here ***************************
+    is_team_assignment = params[:assignment][:team_assignment]
+    is_roleset_selected = params[:roleset_selection_status]
+    is_role_selected = params[:role_selection_status]
+#********************************* E726 Changes Ends Here ****************************
 
     @assignment = Assignment.new(params[:assignment])
     @user =  ApplicationHelper::get_user_role(session[:user])
@@ -143,6 +155,36 @@ class AssignmentController < ApplicationController
       raise "Please enter a valid Submission deadline!!"
       render :action => 'create'
     elsif (@assignment.save)
+
+
+#***************************** E726 Changes Starts Here ******************************
+      if is_team_assignment == "true"
+        if is_roleset_selected == "yes"
+           params[:team_rolesets].each do |x|
+              if x.to_i != 0
+                 roles_of_roleset = TeamRolesetsMap.find_all_by_team_rolesets_id(x.to_i)
+                 roles_of_roleset.each do |y|
+                    teamrole_assignment_entry = TeamroleAssignment.new
+                    teamrole_assignment_entry.team_role_id = y.team_role_id
+                    teamrole_assignment_entry.assignment_id = @assignment.id
+                    teamrole_assignment_entry.save
+                 end
+              end
+           end
+        end
+        if is_role_selected == "yes"
+          params[:team_roles].each do |x|
+            if x.to_i != 0
+               teamrole_assignment_entry = TeamroleAssignment.new
+               teamrole_assignment_entry.team_role_id = x.to_i
+               teamrole_assignment_entry.assignment_id = @assignment.id
+               teamrole_assignment_entry.save
+            end
+          end
+        end
+      end
+#****************************** E726 Changes Ends Here ********************************
+
       set_questionnaires
       set_limits_and_weights
       max_round = 1

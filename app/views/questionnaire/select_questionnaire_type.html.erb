@@ -1,6 +1,45 @@
+<script type="text/javascript">
+
+function assignToRole()
+{
+    getCheck = document.getElementById("role_check");
+    getSelect = document.getElementById("role_quest_select");
+    gethidden = document.getElementById("role_selected");
+    if (getCheck.checked == true)
+    {
+        getSelect.disabled = false;
+        gethidden.setValue("yes");
+    }
+    else
+    {
+        getSelect.disabled = true;
+        gethidden.setValue("no");
+    }
+}
+</script>
+
 <%= render :partial => 'scripts' %>
 <% form_tag :action => 'create_questionnaire' do %>
     <%= render :partial => 'questionnaire' %>
+   <% if @questionnaire.display_type.downcase == "teammate review" %>
+       <table>
+       <tr>
+         <td>
+            <input id="role_check"  type="checkbox" name="role_check" onchange="assignToRole()"> Questionnaire for Role
+         </td>
+         <td> &nbsp &nbsp &nbsp<input id="role_selected" type="hidden" name="role_selected" value="no"> </td>
+         <td>
+           <select id='role_quest_select' name='role_quest_select' disabled="true">
+            <%@all_team_roles.each do |x| %>
+                <option value ="<%=x.id%>"><%= x.role_names %></option>
+            <%end%>
+           </select>
+         </td>
+       </tr>
+       </table>
+   <%end%>
+
+    <br>
   	<%= submit_tag "Create #{@questionnaire.display_type.downcase}", :name=>"save" %>
     <script>
       for (var x = 1; x <= 5; x++) {addQuestions();}

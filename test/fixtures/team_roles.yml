@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  rolenames: MyString
+  questionnaire_id: 1
+
+two:
+  rolenames: MyString
+  questionnaire_id: 1

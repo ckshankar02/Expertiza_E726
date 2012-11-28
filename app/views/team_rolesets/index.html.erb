@@ -1,0 +1,23 @@
+<h3>List of Team Rolesets</h3>
+
+<table>
+  <tr>
+    <th>Roleset name</th>
+  </tr>
+
+<% @team_rolesets.each do |team_roleset| %>
+  <tr>
+    <td><%=h team_roleset.roleset_name %></td>
+    <!--
+    <td><%= link_to 'Show', team_roleset %></td>
+    -->
+    <td><%= link_to 'Edit', edit_team_roleset_path(team_roleset) %> </td>
+    <td>| <%= link_to 'Delete', team_roleset, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'Create New Roleset', new_team_roleset_path %> |
+<%= link_to 'Back',:controller=> 'tree_display', :action=> 'list' %>

@@ -1,0 +1,16 @@
+<h1>Editing team_roleset</h1>
+
+<% form_for(@team_roleset) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :roleset_name %><br />
+    <%= f.text_field :roleset_name %>
+  </p>
+  <p>
+    <%= f.submit 'Update' %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @team_roleset %> |
+<%= link_to 'Back', team_rolesets_path %>

@@ -1,0 +1,16 @@
+<h3>Edit Team Role</h3>
+
+<% form_for(@team_role) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :role_names %><br />
+    <%= f.text_field :role_names %>
+  </p>
+  <p>
+    <%= f.submit 'Update' %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @team_role %> |
+<%= link_to 'Back', team_roles_path %>

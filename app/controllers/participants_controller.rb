@@ -25,6 +25,7 @@ class ParticipantsController < ApplicationController
     participant = Participant.find_by_parent_id_and_handle(params[:id],params[:user][:name])
     participant.special_role = params[:special_role].to_s
     participant.save
+
     # E726 Fall2012 Changes End
 
     redirect_to :action => 'list', :id => curr_object.id, :model => params[:model]

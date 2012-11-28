@@ -1,0 +1,28 @@
+<h3>Team Roles</h3>
+
+<% if !flash[:notice].nil? %>
+    <div><%= flash[:notice]%></div>
+<% end %>
+<br>
+<table>
+  <tr>
+    <th>Rolenames</th>
+  <!--  <th>Questionnaire</th> -->
+  </tr>
+
+<% @team_roles.each do |team_role| %>
+  <tr>
+    <td><%=h team_role.role_names %></td>
+ <!--   <td><%=h team_role.questionnaire_id %></td> -->
+ <!--
+    <td><%= link_to 'Show', team_role %></td>
+    -->
+    <td><%= link_to 'Edit', edit_team_role_path(team_role) %></td>
+    <td> | <%= link_to 'Delete', team_role, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<%= link_to 'Back',:controller=> 'tree_display', :action=> 'list' %> |
+<%= link_to 'Create New Role', new_team_role_path %>

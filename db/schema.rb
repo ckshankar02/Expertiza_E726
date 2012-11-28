@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121117003355) do
+ActiveRecord::Schema.define(:version => 20121127220023) do
 
   create_table "assignment_questionnaires", :force => true do |t|
     t.integer "assignment_id"
@@ -472,15 +472,15 @@ ActiveRecord::Schema.define(:version => 20121117003355) do
   add_index "ta_mappings", ["course_id"], :name => "fk_ta_mappings_course_id"
   add_index "ta_mappings", ["ta_id"], :name => "fk_ta_mappings_ta_id"
 
-  create_table "team_role_questionnaire", :force => true do |t|
+  create_table "team_role_questionnaires", :force => true do |t|
     t.integer  "team_roles_id"
     t.integer  "questionnaire_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "team_role_questionnaire", ["questionnaire_id"], :name => "fk_questionnaire_id"
-  add_index "team_role_questionnaire", ["team_roles_id"], :name => "fk_team_roles_id"
+  add_index "team_role_questionnaires", ["questionnaire_id"], :name => "fk_questionnaire_id"
+  add_index "team_role_questionnaires", ["team_roles_id"], :name => "fk_team_roles_id"
 
   create_table "team_roles", :force => true do |t|
     t.string  "role_names"
@@ -503,13 +503,13 @@ ActiveRecord::Schema.define(:version => 20121117003355) do
   add_index "team_rolesets_maps", ["team_role_id"], :name => "fk_team_role_id"
   add_index "team_rolesets_maps", ["team_rolesets_id"], :name => "fk_team_rolesets_id"
 
-  create_table "teamrole_assignment", :force => true do |t|
-    t.integer "team_roleset_id"
+  create_table "teamrole_assignments", :force => true do |t|
+    t.integer "team_role_id"
     t.integer "assignment_id"
   end
 
-  add_index "teamrole_assignment", ["assignment_id"], :name => "fk_teamrole_assignment_assignments"
-  add_index "teamrole_assignment", ["team_roleset_id"], :name => "fk_teamrole_assignment_team_rolesets"
+  add_index "teamrole_assignments", ["assignment_id"], :name => "fk_teamrole_assignments_assignments"
+  add_index "teamrole_assignments", ["team_role_id"], :name => "fk_teamrole_assignments_team_roles"
 
   create_table "teams", :force => true do |t|
     t.string  "name"

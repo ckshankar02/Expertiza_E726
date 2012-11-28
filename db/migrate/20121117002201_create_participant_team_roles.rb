@@ -8,7 +8,7 @@ class CreateParticipantTeamRoles < ActiveRecord::Migration
     end
     execute "ALTER TABLE `participant_team_roles`
     ADD CONSTRAINT fk_role_assignment_id
-    FOREIGN KEY (role_assignment_id) references teamrole_assignment(id)"
+    FOREIGN KEY (role_assignment_id) references teamrole_assignments(id)"
     execute "ALTER TABLE `participant_team_roles`
     ADD CONSTRAINT fk_participant_id
     FOREIGN KEY (participant_id) references participants(id)"

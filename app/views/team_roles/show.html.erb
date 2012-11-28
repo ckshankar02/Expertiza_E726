@@ -1,0 +1,14 @@
+<p>
+  <b>Rolenames:</b>
+  <%=h @team_role.role_names %>
+</p>
+
+
+<p>
+  <b>Questionnaire:</b>
+  <%=h @team_role.questionnaire_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_team_role_path(@team_role) %> |
+<%= link_to 'Back', team_roles_path %>
