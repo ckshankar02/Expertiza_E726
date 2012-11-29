@@ -35,6 +35,13 @@
 
 <HR>
 <%= @response.display_as_html(nil,nil,file_url) %>
+
+<% if !@role_response.nil? %>
+    <br>  <br>
+    <h1> Role based Review </h1>
+    <%= @role_response.display_as_html(nil,nil,file_url) %>
+<% end %>
+
 <% if @map.questionnaire.section.eql? "Custom" %>
     <%
   i = 0

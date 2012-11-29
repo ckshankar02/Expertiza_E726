@@ -120,6 +120,71 @@
 	<textarea cols="70" rows="1" id="review_comments" name="review[comments]"  style="overflow:hidden;" onkeyup="checkRows(this)" ><% if controller.action_name != 'new' and @response.additional_comment != nil %><%=@response.additional_comment.strip%><% end %></textarea>
 </p>
 
+    <!----------------------------------------- OSS CHANGE STARTS HERE-------------------------------------------->
+    <!-- The Role based review rubrics are rendered here -->
+    <% if !@reviewed_role.nil? %>
+        <h2>Role Based Review</h2>
+        <div>
+          Team Member  : <%= @reviewed_student.name %>
+        </div>
+        <br>
+        <div>
+          Member's Role: <%= @reviewed_role.role_names %>
+        </div>
+        <br>
+        <%= hidden_field_tag 'is_role_based', "YES" %>
+        <%= hidden_field_tag 'role_map_id', @modified_role_object %>
+        <%= hidden_field_tag 'role_reviewed_ptr', @reviewed_role.id  %>
+        <% i = 0
+           @role_questions.each {
+                   | question | %>
+            <%= question.txt %><BR/>
+            <% if controller.action_name != 'new' and @role_review_scores[i] != nil and @role_review_scores[i].comments != nil %>
+                <% text = @role_review_scores[i].comments.gsub(/\"/,'&quot;').lstrip %>
+                <textarea cols="70" rows="1" id="responses_role_<%=i%>_comments" name="responses_role[<%=i%>][comment]"  style="overflow:hidden;" onkeyup="checkRows(this)" ><%= text %></textarea>
+            <% else %>
+                <textarea cols="70" rows="1" id="responses_role_<%=i%>_comments" name="responses_role[<%=i%>][comment]"  style="overflow:hidden;" onkeyup="checkRows(this)" ></textarea>
+            <% end %>
+            <% if question.true_false? %>
+                <select id="responses_role_<%=i%>_score" name="responses_role[<%=i%>][score]">
+                  <%  if controller.action_name != 'new' %>
+                      <option value="<%=@role_min%>" <%if @role_min==@role_review_scores[i].score%>selected="selected"<%end%> ><%=@role_min%></option>
+                      <option value="<%=@role_max%>" <%if @role_max==@rrole_review_scores[i].score%>selected="selected"<%end%> ><%=@role_max%></option>
+                  <%else%>
+                      <option value="<%=@role_min%>"><%=@role_min%></option>
+                      <option value="<%=@role_max%>"><%=@role_max%></option>
+                  <%end%>
+                </select>
+            <% else %>
+                <select id="responses__role<%=i%>_score" name="responses_role[<%=i%>][score]">
+                  <% for j in @role_min..@role_max %>
+                      <%if controller.action_name != 'new'and @role_review_scores[i] != nil %>
+                          <option value="<%=j%>"<% if j==@role_review_scores[i].score%> selected="selected"<%end%> ><%=j%></option>
+                      <%else%>
+                          <option value="<%=j%>" ><%=j%></option>
+                      <% end %>
+                  <% end %>
+                </select>
+            <% end %>
+            <%if question.question_advices.size > 0%>
+                <%= render :partial => 'advice', :locals => {:i => i, :advice_list => question.question_advices} %>
+            <% else %>
+                <br/>
+            <% end %>
+            <BR/><BR/>
+        <% i+=1
+           } %>
+
+        <p>
+          <label for="review_comments">Additional Comments</label><BR/>
+          <textarea cols="70" rows="1" id="review_role_comments" name="review_role[comments]"  style="overflow:hidden;" onkeyup="checkRows(this)" ><% if controller.action_name != 'new' and @response.additional_comment != nil %><%=@response.additional_comment.strip%><% end %></textarea>
+        </p>
+    <% end %>
+
+    <!----------------------------------------- OSS CHANGE ENDS HERE -------------------------------------------->
+
+
+
 <br/>
 <%= submit_tag "Save "+@title, :name=>"save" %>
 <%= hidden_field_tag('return', @return) %>

@@ -150,9 +150,9 @@ class QuestionnaireController < ApplicationController
     @questionnaire.section = params[:questionnaire][:section]
     @questionnaire.id = params[:questionnaire][:id]
     @questionnaire.display_type = params[:questionnaire][:display_type]
-
-    @all_team_roles = TeamRole.all
-
+#*********************** E726 Changes Starts Here *****************************************
+    @all_team_roles = TeamRole.find_by_sql("select * from team_roles tr where tr.id NOT IN (select team_roles_id from team_role_questionnaires)")
+#*********************** E726 Changes Ends Here *****************************************
   end
 
   # Save the new questionnaire to the database
@@ -218,13 +218,14 @@ class QuestionnaireController < ApplicationController
       if QuestionnaireNode.find_by_parent_id_and_node_object_id(parent.id,@questionnaire.id) == nil
         QuestionnaireNode.create(:parent_id => parent.id, :node_object_id => @questionnaire.id)
       end
+ #******************************* E726 Changes Starts Here *********************************************
       if @role_selection_status == "yes"
         team_role_questionnaire_entry = TeamRoleQuestionnaire.new
         team_role_questionnaire_entry.team_roles_id = @selected_role
         team_role_questionnaire_entry.questionnaire_id = @questionnaire.id
         team_role_questionnaire_entry.save
       end
-
+#******************************* E726 Changes Ends Here *********************************************
     rescue
       flash[:error] = $!
     end

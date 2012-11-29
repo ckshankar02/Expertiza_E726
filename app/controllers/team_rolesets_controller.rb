@@ -23,7 +23,8 @@ class TeamRolesetsController < ApplicationController
   # GET /team_rolesets/new
   # GET /team_rolesets/new.xml
   def new
-    @all_team_roles = TeamRole.all
+#    @all_team_roles = TeamRole.all
+    @all_team_roles = TeamRole.find_by_sql("select * from team_roles tr where tr.id IN (select team_roles_id from team_role_questionnaires)")
     @team_roleset = TeamRoleset.new
 =begin
     respond_to do |format|
@@ -35,7 +36,20 @@ class TeamRolesetsController < ApplicationController
 
   # GET /team_rolesets/1/edit
   def edit
+    @roles_of_roleset = Array.new
     @team_roleset = TeamRoleset.find(params[:id])
+    @rolesmap_of_roleset = TeamRolesetsMap.find_all_by_team_rolesets_id(@team_roleset.id)
+
+    @rolesmap_of_roleset.each do |x|
+      @roles_of_roleset << TeamRole.find(x.team_role_id)
+    end
+  end
+
+  def remove_from_roleset
+    role_to_remove = TeamRolesetsMap.find(params[:id])
+    to_edit = role_to_remove.team_rolesets_id
+    role_to_remove.destroy
+    redirect_to :controller=>'team_rolesets', :action=>'edit', :id=> to_edit.to_i
   end
 
   # POST /team_rolesets
@@ -96,4 +110,6 @@ class TeamRolesetsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
+
 end

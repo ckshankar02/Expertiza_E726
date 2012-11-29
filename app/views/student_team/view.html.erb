@@ -21,23 +21,73 @@
             <td><%= member.user.name %></td>
             <td><%= member.user.fullname %></td>
             <td><%= member.user.email %></td>
+
+<!------------------------------ E726 Changes Starts Here ------------------------------>
+            <%
+               role_map = nil
+               role_map_id = nil
+               role_review = nil
+               role_review_id = nil
+            %>
+<!------------------------------- E726 Changes Ends Here ------------------------------->
+
             <% if @student.assignment.questionnaires.find_by_type('TeammateReviewQuestionnaire') != nil and member.user.id != session[:user].id %>
 
                 <% map = TeammateReviewResponseMap.find(:first, :conditions => ['reviewer_id = ? and reviewee_id = ?', @student.id, member.id])
                    if map.nil?
                        map = TeammateReviewResponseMap.create(:reviewer_id => @student.id, :reviewee_id => member.id, :reviewed_object_id => @student.assignment.id)
                    end
-                   review = map.response
-                   if review.nil? %>
+                   review = map.response%>
+
+<!-------------------------------- E726 Changes Starts Here ----------------------------->
+                  <%
+                     i = 0
+                     role_id = 0
+                     if !@team_member.nil?
+                        @team_member.each do |x|
+                            if x.id == member.user.id
+                                if @team_member_role[i].nil?
+                                    role_id = nil
+                                    role_map_id = nil
+                                    role_review = nil
+                                    role_review_id = nil
+                                else
+                                    role_id = @team_member_role[i].id
+                                    role_map = ResponseMap.find(:first, :conditions => ["reviewer_id = ? and reviewee_id = ? and type = 'RoleBasedReviewResponseMap'", @student.id, member.id] )
+
+                                    if role_map.nil?
+                                        role_map = ResponseMap.new
+                                        role_map.reviewed_object_id = map.reviewed_object_id
+                                        role_map.reviewer_id = map.reviewer_id
+                                        role_map.reviewee_id = map.reviewee_id
+                                        role_map.type = 'RoleBasedReviewResponseMap'
+                                        role_map.save
+                                    end
+
+                                    role_map_id = role_map.id
+                                    role_review = role_map.response
+
+                                    if !role_review.nil?
+                                        role_review_id = role_review.id
+                                    end
+                                end
+                            end
+                            i = i + 1
+                        end
+                     end
+                  %>
+<!-------------------------------- E726 Changes Ends Here ----------------------------->
+
+                   <%if review.nil? %>
                     <td>
-                      <%= link_to "Review", {:controller => 'response', :action => 'new', :id => map.id, :return => "teammate"} %>
+                      <%= link_to "Review", {:controller => 'response', :action => 'new', :id => map.id, :return => "teammate", :reviewed_member => member.user.id, :role_info => role_id, :rolemap_id => role_map_id} %>
                     </td>
                 <% else %>
                     <td>
-                      <%= link_to "View", {:controller => 'response', :action => 'view', :id => review.id} %>
+                      <%= link_to "View", {:controller => 'response', :action => 'view', :id => review.id, :role_info => role_id, :role_review_id => role_review_id} %>
                     </td>
                     <td>
-                      <%= link_to "Edit", {:controller => 'response', :action => 'edit', :id => review.id, :return => "teammate"} %>
+                      <%= link_to "Edit", {:controller => 'response', :action => 'edit', :id => review.id, :return => "teammate", :role_info => role_id, :review_role_id => role_review_id, :reviewed_member => member.user.id} %>
                     </td>
                 <% end %>
             <% end %>
@@ -48,6 +98,63 @@
     <%= link_to "Leave Team",
                 {:controller => 'student_team', :action => 'leave', :student_id => @student.id, :team_id => @student.team.id} %>
 <% end %>
+
+<!---------------------------------- E726 Changes Starts Here ----------------------------------->
+
+<% if @student.team != nil
+        if @roles_for_assignment .count > 0
+%>
+        <h2>Team Roles</h2>
+        <% if @role_selected_flag == 1 %>
+            <% form_tag :controller => 'student_team', :action => 'select_role' do %>
+              <table>
+                <tr>
+                    <td> Select a Role: </td>
+                    <td>
+                      <%= hidden_field_tag 'part_id', @student.id %>
+                      <%= hidden_field_tag 'current_user_id', session[:user].id %>
+                      <%= hidden_field_tag 'current_assignment_id', @student.parent_id %>
+                      <select name="team_member_roles" >
+                        <option value="0">None</option>
+                            <% @all_team_roles.each do |x|%>
+                               <option value="<%=x.id %>"><%= x.role_names %></option>
+                            <%end%>
+                      </select>
+                    </td>
+                    <td>
+                      <%= submit_tag "Select" %>
+                    </td>
+                </tr>
+              </table>
+            <%end%>
+        <%end%>
+        <table>
+          <% i=0 %>
+          <tr>
+            <td><h3>Members</h3></td>
+            <td><h3>Roles</h3></td>
+          </tr>
+          <% @team_member.each do |y| %>
+          <tr>
+            <td>
+                <%= y.name %>
+            </td>
+            <td>
+              <% if @team_member_role[i].nil? %>
+                 No role taken!!!
+              <% else %>
+                 <%= @team_member_role[i].role_names %>
+              <% end %>
+            </td>
+          </tr>
+              <% i = i+1 %>
+              <%end%>
+        </table>
+<%      end
+  end
+%>
+
+<!---------------------------------- E726 Changes Ends Here ----------------------------------->
 
 <% if @student.team != nil %>
 <h2>Team Advertisement</h2>

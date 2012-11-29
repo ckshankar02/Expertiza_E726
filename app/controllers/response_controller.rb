@@ -127,6 +127,23 @@ class ResponseController < ApplicationController
     @return = params[:return]
     @response = Response.find(params[:id]) 
     return if redirect_when_disallowed(@response)
+
+#********************* E726 Changes Starts Here ************************************************
+    is_role_present = params[:role_info]
+    if !is_role_present.nil?
+      is_role_present = "YES"
+      @role_response = Response.find(params[:review_role_id])
+      @reviewed_role = TeamRole.find(params[:role_info])
+      @reviewed_role_ques = TeamRoleQuestionnaire.find_by_team_roles_id(@reviewed_role.id)
+    else
+      is_role_present = "NO"
+      @reviewed_role = nil
+      @role_response = nil
+    end
+    @reviewed_student = User.find(params[:reviewed_member])
+#********************** E726 Changes Ends Here ************************************************
+
+
     @map = @response.map 
     array_not_empty=0
     @sorted_array=Array.new
@@ -151,6 +168,38 @@ class ResponseController < ApplicationController
       @review_scores << Score.find_by_response_id_and_question_id(@response.id, question.id)
       @question_type << QuestionType.find_by_question_id(question.id)
     }
+
+#*********************** E726 Changes Starts Here ********************************
+    if !@role_response.nil?
+      @role_map = @role_response.map
+      role_array_not_empty = 0
+      @role_sorted_array = Array.new
+      @role_prev = Response.all
+      for element in @role_prev
+        if(element.map_id==@role_map.id)
+          role_array_not_empty = 1
+          @role_sorted_array << element
+        end
+      end
+      if role_array_not_empty==1
+        @role_sorted = @role_sorted_array.sort { |m1,m2|(m1.version_num and m2.version_num) ? m2.version_num <=> m1.version_num : (m1.version_num ? -1 : 1)}
+        @role_largest_version_num = @role_sorted[0]
+      end
+      @role_response = Response.find_by_map_id_and_version_num(@role_map.id,@role_largest_version_num.version_num)
+      @modified_role_object = @role_response.id
+      @reviewed_role_ptr = TeamRole.find(params[:role_info].to_i)
+      @reviewed_role_ques_ptr = TeamRoleQuestionnaire.find_by_team_roles_id(@reviewed_role_ptr.id)
+      get_role_content
+      @role_review_scores = Array.new
+      @role_question_type = Array.new
+      @role_questions.each{
+          | question |
+        @role_review_scores << Score.find_by_response_id_and_question_id(@role_response.id, question.id)
+        @role_question_type << QuestionType.find_by_question_id(question.id)
+      }
+    end
+#************************ E726 Changes Ends Here ********************************
+
     # Check whether this is a custom rubric
     if @map.questionnaire.section.eql? "Custom"
       @next_action = "custom_update"
@@ -180,6 +229,18 @@ class ResponseController < ApplicationController
   def update
     @response = Response.find(params[:id])
     return if redirect_when_disallowed(@response)
+
+#**************************** E726 Changes Starts Here ******************************
+
+    is_role_response_present = params[:role_map_id]
+    if !is_role_response_present.nil?
+      @role_response = Response.find(params[:role_map_id])
+    else
+      @role_response = nil
+    end
+
+#***************************** E726 Changes Ends Here ********************************
+
     @myid = @response.id
     msg = ""
     begin 
@@ -199,7 +260,32 @@ class ResponseController < ApplicationController
           end
         score.update_attribute('score',v[:score])
         score.update_attribute('comments',v[:comment])
-     end    
+      end
+
+#********************** E726 Changes Starts Here *********************************
+
+      if !@role_response.nil?
+
+        @my_role_response_id = @role_response.id
+        @map = @role_response.map
+        @role_response.update_attribute('additional_comment',params[:review][:comments])
+
+        @reviewed_role = TeamRole.find(params[:role_reviewed_ptr])
+        @reviewed_role_ques = TeamRoleQuestionnaire.find_by_team_roles_id(@reviewed_role.id)
+        @role_questionnaire = Questionnaire.find(@reviewed_role_ques.questionnaire_id)
+        role_questions = Question.find_all_by_questionnaire_id(@role_questionnaire.id)
+
+        params[:responses_role].each_pair do |k,v|
+          role_score = Score.find_by_response_id_and_question_id(@role_response.id, role_questions[k.to_i].id)
+          if(role_score == nil)
+            role_score = Score.create(:response_id => @role_response.id, :question_id => role_questions[k.to_i].id, :score => v[:score], :comments => v[:comment])
+          end
+          role_score.update_attribute('score',v[:score])
+          role_score.update_attribute('comments',v[:comment])
+        end
+      end
+
+#********************** E726 Changes Starts Here *********************************
     rescue
       msg = "Your response was not saved. Cause: "+ $!
     end
@@ -255,6 +341,20 @@ class ResponseController < ApplicationController
   
   def view
     @response = Response.find(params[:id])
+
+#****************************** E726 Changes Starts Here *************************
+
+    role_resp_var = params[:role_review_id]
+    if !role_resp_var.nil?
+      @role_response = Response.find(role_resp_var.to_i)
+      @reviewed_role_ptr = TeamRole.find(params[:role_info].to_i)
+      @reviewed_role_ques_ptr = TeamRoleQuestionnaire.find_by_team_roles_id(@reviewed_role_ptr.id)
+    else
+      @role_response = nil
+    end
+
+#******************************* E726 Changes Ends Here *************************
+
     return if redirect_when_disallowed(@response)
     @map = @response.map
     get_content
@@ -265,6 +365,23 @@ class ResponseController < ApplicationController
       @review_scores << Score.find_by_response_id_and_question_id(@response.id, question.id)
       @question_type << QuestionType.find_by_question_id(question.id)
     }
+
+#***************************** E726 Changes Starts Here **************************
+
+    if !role_resp_var.nil?
+      @role_map = @role_response.map
+      get_role_content
+      @role_review_scores = Array.new
+      @role_question_type = Array.new
+      @role_questions.each{
+          | question |
+        @role_review_scores << Score.find_by_response_id_and_question_id(@role_response.id, question.id)
+        @role_question_type << QuestionType.find_by_question_id(question.id)
+      }
+    end
+
+#****************************** E726 Changes Ends Here ***************************
+
   end
   
   def new
@@ -274,6 +391,27 @@ class ResponseController < ApplicationController
     @map = ResponseMap.find(params[:id])
     @return = params[:return]
     @modified_object = @map.id
+
+#************************** E726 Changes Starts Here ***************************
+
+    @modified_role_object = params[:rolemap_id]
+    @reviewed_student = User.find(params[:reviewed_member])
+
+    role_present = params[:role_info]
+
+    if !role_present.nil?
+      @reviewed_role = TeamRole.find(params[:role_info])
+      @reviewed_role_quest = TeamRoleQuestionnaire.find_by_team_roles_id(@reviewed_role.id)
+      @role_questionnaire = Questionnaire.find(@reviewed_role_quest.questionnaire_id)
+      @role_questions = Question.find_all_by_questionnaire_id(@role_questionnaire.id)
+      @role_min = @role_questionnaire.min_question_score
+      @role_max = @role_questionnaire.max_question_score
+    else
+      @reviewed_role = nil
+    end
+
+#************************** E726 Changes Ends Here ***************************
+
     get_content
     #**********************
     # Check whether this is a custom rubric
@@ -303,6 +441,18 @@ class ResponseController < ApplicationController
   
   def create
     @map = ResponseMap.find(params[:id])
+
+#******************* E726 Changes Starts Here ********************************
+
+    is_role_based_review = params[:is_role_based]
+    if is_role_based_review == "YES"
+      @role_map = ResponseMap.find(params[:role_map_id])
+      @reviewed_role_ptr = TeamRole.find(params[:role_reviewed_ptr].to_i)
+      @reviewed_role_ques_ptr = TeamRoleQuestionnaire.find_by_team_roles_id(@reviewed_role_ptr.id)
+    end
+
+#******************* E726 Changes Ends Here ********************************
+
     @res = 0
     msg = ""
     error_msg = ""
@@ -319,6 +469,21 @@ class ResponseController < ApplicationController
         end
       end
 
+#*********************** E726 Changes Starts Here *********************************
+
+      array_not_empty = 0
+      @sorted_role_array = Array.new
+      if is_role_based_review == "YES"
+        for element in @prev
+          if element.map_id == @role_map.id
+            role_array_not_empty = 1
+            @sorted_role_array << element
+          end
+        end
+      end
+
+#************************ E726 Changes Ends Here **********************************
+
       #if previous responses exist increment the version number.
       if array_not_empty==1
          @sorted=@sorted_array.sort { |m1,m2|(m1.version_num and m2.version_num) ? m2.version_num <=> m1.version_num : (m1.version_num ? -1 : 1)}
@@ -333,6 +498,24 @@ class ResponseController < ApplicationController
       else
           @version=1
       end
+
+#**************************** E726 Changes Starts Here ****************************
+#if previous responses exist increment the version number.
+      if is_role_based_review == "YES"
+        if role_array_not_empty == 1
+          @sorted_role = @sorted_role_array.sort {|m1,m2|(m1.version_num and m2.version_num) ? m2.version_num <=> m1.version_num : (m1.version_num ? -1 : 1)}
+          @largest_role_version_num = @sorted_role[0]
+          if @largest_role_version_num.version_num == nil
+            @role_version = 1
+          else
+            @role_version = @largest_role_version_num.version_num + 1
+          end
+        else
+          @role_version = 1
+        end
+      end
+
+#***************************** E726 Changes Ends Here *****************************
         @response = Response.create(:map_id => @map.id, :additional_comment => params[:review][:comments],:version_num=>@version)
       @res = @response.id
 
@@ -353,7 +536,22 @@ class ResponseController < ApplicationController
 
       params[:responses].each_pair do |k,v|
         score = Score.create(:response_id => @response.id, :question_id => questions[k.to_i].id, :score => v[:score], :comments => v[:comment])
-      end  
+      end
+
+#********************** E726 Changes Starts Here ***********************************
+#The review scores are captured by the below code on to the score table.
+      if is_role_based_review == "YES"
+        @role_response = Response.create(:map_id => @role_map.id, :additional_comment => params[:review_role][:comments],:version_num=>@role_version)
+        @role_res = @role_response.id
+        @role_questionnaire = Questionnaire.find(@reviewed_role_ques_ptr.questionnaire_id)
+        role_questions = Question.find_all_by_questionnaire_id(@role_questionnaire.id)
+        params[:responses_role].each_pair do |k,v|
+          score = Score.create(:response_id => @role_response.id, :question_id => role_questions[k.to_i].id, :score => v[:score], :comments => v[:comment])
+        end
+      end
+
+#*********************** E726 Changes Ends Here ***********************************
+
     rescue
       error_msg = "Your response was not saved. Cause: " + $!
     end
@@ -363,8 +561,28 @@ class ResponseController < ApplicationController
       ScoreCache.update_cache(@res)
       @map.save
       msg = "Your response was successfully saved."
+
+#********************** E726 Changes Starts Here ********************************
+# For the role based review made a score cache entry is made.
+      if is_role_based_review == "YES"
+        ResponseHelper.compare_scores(@role_response, @role_questionnaire)
+        ScoreCache.update_cache(@role_res)
+        @role_map.save
+        msg = "Your response was successfully saved."
+      end
+#*********************** E726 Changes Ends Here *********************************
+
     rescue
       @response.delete
+
+#*********************** E726 Changes Starts Here *******************************
+
+      if is_role_based_review == "YES"
+        @role_response.delete
+      end
+
+#************************ E726 Changes Ends Here ********************************
+
       error_msg = "Your response was not saved. Cause: " + $!
     end
     redirect_to :controller => 'response', :action => 'saving', :id => @map.id, :return => params[:return], :msg => msg, :error_msg => error_msg
@@ -469,7 +687,23 @@ class ResponseController < ApplicationController
     @min = @questionnaire.min_question_score
     @max = @questionnaire.max_question_score
   end
-  
+
+#************************** E726 Changes Starts Here *************************
+  def get_role_content
+    @role_title = @role_map.get_title
+    @role_assignment = @role_map.assignment
+    @role_participant = @role_map.reviewer
+    @role_contributor = @role_map.contributor
+    @role_res = @role_response.id
+
+    @role_questionnaire = Questionnaire.find(@reviewed_role_ques_ptr.questionnaire_id)
+    @role_questions = Question.find_all_by_questionnaire_id(@role_questionnaire.id)
+    @role_min = @role_questionnaire.min_question_score
+    @role_max = @role_questionnaire.max_question_score
+
+  end
+#*************************** E726 Changes Ends Here ***************************
+
   def redirect_when_disallowed(response)
     # For author feedback, participants need to be able to read feedback submitted by other teammates.
     # If response is anything but author feedback, only the person who wrote feedback should be able to see it.

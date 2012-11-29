@@ -2,13 +2,76 @@ class StudentTeamController < ApplicationController
   auto_complete_for :user, :name
    
   def view
+    @all_team_roles = Array.new
+    @team_member = Array.new
+    @team_member_role = Array.new
+    @role_selected_flag = 0
+
     @student = AssignmentParticipant.find(params[:id])
     return unless current_user_id?(@student.user_id)
     
     @send_invs = Invitation.find(:all, :conditions => ['from_id = ? and assignment_id = ?', @student.user.id, @student.assignment.id])
     @received_invs = Invitation.find(:all, :conditions => ['to_id = ? and assignment_id = ? and reply_status = "W"', @student.user.id, @student.assignment.id])
+
+    @roles_for_assignment = TeamroleAssignment.find_all_by_assignment_id(@student.assignment.id)
+    @roles_for_assignment.each do |x|
+      @all_team_roles << TeamRole.find(x.team_role_id)
+    end
+#****************************** E726 Changes starts here *********************************************
+#The team of the currently logged in user is determined
+
+    assignment_teams = Team.find_all_by_parent_id(@student.parent_id)
+
+    current_team_id = 0
+    assignment_teams.each do |x|
+      find_user_team = TeamsUser.find_all_by_team_id(x.id)
+      find_user_team.each do |x1|
+        if(x1.user_id == session[:user].id)           #Team of the current session user
+          current_team_id = x1.team_id
+        end
+      end
+    end
+    team_mem_id = 0
+    #All the members of the selected team are populated
+    team_mem_id = TeamsUser.all(:conditions => ["team_id = ?",current_team_id])
+
+    team_mem_id.each do |x|
+      team_user_info = User.find(x.user_id)
+      @team_member << team_user_info
+    end
+
+
+    @team_member.each do |x|
+        getParticipant = Participant.all(:conditions => ["user_id = ? and parent_id = ?",x.id,@student.assignment.id]).first
+        getRoleAssignmentId = ParticipantTeamRole.find_by_participant_id(getParticipant.id)
+        if(getRoleAssignmentId.nil?)
+          @team_member_role << NIL
+          if x.id == session[:user].id
+            @role_selected_flag = 1
+          end
+        else
+          getRole = TeamroleAssignment.find(getRoleAssignmentId.role_assignment_id)
+          @team_member_role << TeamRole.find(getRole.team_role_id)
+        end
+    end
+
+#*********************************** E726 Changes Ends Here *****************************************
+
   end
-   
+
+  def select_role
+    @part_team_role  = ParticipantTeamRole.new
+    role_taken = params[:team_member_roles].to_i
+    assignment_identifier = params[:current_assignment_id].to_i
+    get_teamrole_assignment = TeamroleAssignment.find(:all, :conditions => ["team_role_id = ? and assignment_id = ?",role_taken, assignment_identifier]).first
+    @part_team_role.role_assignment_id = get_teamrole_assignment.id
+    @part_team_role.participant_id = params[:part_id]
+    @part_team_role.save
+
+    redirect_to :controller => 'student_team', :action => 'view' , :id => params[:part_id]
+  end
+
+
   def create
     @student = AssignmentParticipant.find(params[:id])
     return unless current_user_id?(@student.user_id)

@@ -1,4 +1,4 @@
-<h1>Editing team_roleset</h1>
+<h1 xmlns="http://www.w3.org/1999/html">Editing team_roleset</h1>
 
 <% form_for(@team_roleset) do |f| %>
   <%= f.error_messages %>
@@ -8,9 +8,23 @@
     <%= f.text_field :roleset_name %>
   </p>
   <p>
-    <%= f.submit 'Update' %>
+    <%= f.submit 'Rename' %>
   </p>
 <% end %>
+
+<table>
+  <tr>
+    <td>Roles</td><td colspan="2">Options</td>
+  </tr>
+  <tr>
+  <% i = 0 %>
+  <% @rolesmap_of_roleset.each do |x| %>
+  <td><%= @roles_of_roleset[i].role_names %></td>
+  <td><%= link_to 'Remove',{:controller=>'team_rolesets', :action=>'remove_from_roleset', :id =>x.id, :to_edit=>@team_roleset.id} %> </td>
+   </tr>
+    <% i = i + 1 %>
+  <% end %>
+</table>
 
 <%= link_to 'Show', @team_roleset %> |
 <%= link_to 'Back', team_rolesets_path %>
