@@ -6,8 +6,8 @@ class AlterAssignments < ActiveRecord::Migration
   end
 
   def self.down
-    remove_column "assignments", "selfreview_questionnaire_id",:integer
-    remove_column "assignments", "managerreview_questionnaire_id", :integer
-    remove_column "assignments", "readerreview_questionnaire_id",:integer
+    remove_column "assignments", "selfreview_questionnaire_id"
+    remove_column "assignments", "managerreview_questionnaire_id"
+    remove_column "assignments", "readerreview_questionnaire_id"
   end
 end

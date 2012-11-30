@@ -68,12 +68,15 @@ class Assignment < ActiveRecord::Base
     # The following method raises an exception if not successful which 
     # has to be captured by the caller (in review_mapping_controller)
     contributor = contributor_to_review(reviewer, topic)
-    
+    # E726 Fall2012 Change Begin
+    contributor.reviews_rem -= 1
+    # E726 Fall2012 Change Begin
     contributor.assign_reviewer(reviewer)
   end
   
   # Returns a contributor to review if available, otherwise will raise an error
   def contributor_to_review(reviewer, topic)
+
     raise "Please select a topic" if has_topics? and topic.nil?
     raise "This assignment does not have topics" if !has_topics? and topic
     
@@ -83,7 +86,7 @@ class Assignment < ActiveRecord::Base
     if topic
       raise "This topic has too many reviews; please select another one." unless candidate_topics_to_review.include?(topic)
     end
-    
+
     contributor_set = Array.new(contributors)
     work = (topic.nil?) ? 'assignment' : 'topic'
 
@@ -92,7 +95,10 @@ class Assignment < ActiveRecord::Base
     contributor_set.reject! do |contributor| 
       signed_up_topic(contributor) != topic or # both will be nil for assignments with no signup sheet
         contributor.includes?(reviewer) or
-        !contributor.has_submissions?
+        !contributor.has_submissions? or
+          contributor.reviews_rem.nil?   # E726 Fall2012 Change - To remove the contributor
+                                         #for which the maximum number of reviews
+                                         #have been reached
     end
     raise "There are no more submissions to review on this #{work}." if contributor_set.empty?
 

@@ -26,6 +26,7 @@ class StudentReviewController < ApplicationController
       @num_metareviews_completed += 1 if map.response
     end
     @num_metareviews_in_progress = @num_metareviews_total - @num_metareviews_completed
+
     if @assignment.staggered_deadline?
       @review_mappings.each { |review_mapping|
         if @assignment.team_assignment?
@@ -49,6 +50,8 @@ class StudentReviewController < ApplicationController
       else
         deadline_type_id = DeadlineType.find_by_name('rereview').id        
       end
+
+
       @metareview_mappings.each do |metareview_mapping|
         review_mapping = ResponseMap.find_by_id(metareview_mapping.reviewed_object_id)
         if review_mapping

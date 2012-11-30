@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121127220023) do
+ActiveRecord::Schema.define(:version => 20121130020239) do
 
   create_table "assignment_questionnaires", :force => true do |t|
     t.integer "assignment_id"
@@ -231,6 +231,7 @@ ActiveRecord::Schema.define(:version => 20121127220023) do
     t.datetime "time_stamp"
     t.text     "digital_signature"
     t.string   "special_role"
+    t.integer  "reviews_rem"
   end
 
   add_index "participants", ["user_id"], :name => "fk_participant_users"
@@ -483,11 +484,8 @@ ActiveRecord::Schema.define(:version => 20121127220023) do
   add_index "team_role_questionnaires", ["team_roles_id"], :name => "fk_team_roles_id"
 
   create_table "team_roles", :force => true do |t|
-    t.string  "role_names"
-    t.integer "questionnaire_id"
+    t.string "role_names"
   end
-
-  add_index "team_roles", ["questionnaire_id"], :name => "fk_team_roles_questionnaire"
 
   create_table "team_rolesets", :force => true do |t|
     t.string "roleset_name"
@@ -517,6 +515,7 @@ ActiveRecord::Schema.define(:version => 20121127220023) do
     t.string  "type"
     t.text    "comments_for_advertisement"
     t.boolean "advertise_for_partner"
+    t.integer "reviews_rem"
   end
 
   create_table "teams_users", :force => true do |t|

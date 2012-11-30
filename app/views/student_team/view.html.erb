@@ -80,14 +80,14 @@
 
                    <%if review.nil? %>
                     <td>
-                      <%= link_to "Review", {:controller => 'response', :action => 'new', :id => map.id, :return => "teammate", :reviewed_member => member.user.id, :role_info => role_id, :rolemap_id => role_map_id} %>
+                      <%= link_to "Review", {:controller => 'response', :action => 'new', :id => map.id, :return => "teammate", :reviewed_member => member.user.id, :role_info => role_id, :rolemap_id => role_map_id, :from_teammate_review=>"yes"} %>
                     </td>
                 <% else %>
                     <td>
-                      <%= link_to "View", {:controller => 'response', :action => 'view', :id => review.id, :role_info => role_id, :role_review_id => role_review_id} %>
+                      <%= link_to "View", {:controller => 'response', :action => 'view', :id => review.id, :role_info => role_id, :role_review_id => role_review_id, :from_teammate_review=>"yes"} %>
                     </td>
                     <td>
-                      <%= link_to "Edit", {:controller => 'response', :action => 'edit', :id => review.id, :return => "teammate", :role_info => role_id, :review_role_id => role_review_id, :reviewed_member => member.user.id} %>
+                      <%= link_to "Edit", {:controller => 'response', :action => 'edit', :id => review.id, :return => "teammate", :role_info => role_id, :review_role_id => role_review_id, :reviewed_member => member.user.id, :from_teammate_review=>"yes"} %>
                     </td>
                 <% end %>
             <% end %>

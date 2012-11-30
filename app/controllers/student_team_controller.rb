@@ -78,7 +78,11 @@ class StudentTeamController < ApplicationController
 
     check = AssignmentTeam.find(:all, :conditions => ["name =? and parent_id =?", params[:team][:name], @student.parent_id])        
     @team = AssignmentTeam.new(params[:team])
-    @team.parent_id = @student.parent_id    
+    @team.parent_id = @student.parent_id
+
+#************************ E726 Changes Starts Here *****************************************
+    @team.reviews_rem = Assignment.find(@student.parent_id).review_topic_threshold
+#************************* E726 Changes Ends Here *****************************************
     #check if the team name is in use
     if (check.length == 0)      
       @team.save

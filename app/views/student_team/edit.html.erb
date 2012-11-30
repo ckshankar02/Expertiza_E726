@@ -2,6 +2,8 @@
 <% form_tag :action => 'update' do %>
 <%= hidden_field_tag 'team_id', @team.id %>
 <%= hidden_field_tag 'student_id', @student.id %>
+
+
 <label for="team_name">Team Name:</label>&nbsp;
 <%= text_field 'team', 'name'%>
 <br>

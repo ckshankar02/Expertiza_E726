@@ -33,7 +33,9 @@ def create_teams
    parent = Object.const_get(session[:team_type]).find(params[:id])
    begin
     Team.check_for_existing(parent, params[:team][:name], session[:team_type])
+
     team = Object.const_get(session[:team_type]+'Team').create(:name => params[:team][:name], :parent_id => parent.id)
+
     TeamNode.create(:parent_id => parent.id, :node_object_id => team.id)
     redirect_to :action => 'list', :id => parent.id
    rescue TeamExistsError
