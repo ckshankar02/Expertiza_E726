@@ -224,7 +224,8 @@ class AssignmentParticipant < Participant
        raise ImportError, "The assignment with id \""+id.to_s+"\" was not found."
     end
     if (find(:all, {:conditions => ['user_id=? AND parent_id=?', user.id, id]}).size == 0)
-          newpart = AssignmentParticipant.create(:user_id => user.id, :parent_id => id)
+      # E726 Fall2012 - Added the third parameter to .create so that reviews_rem gets populated even while importing files
+          newpart = AssignmentParticipant.create(:user_id => user.id, :parent_id => id, :reviews_rem => Assignment.find(id).review_topic_threshold)
           newpart.set_handle()
     end             
   end  

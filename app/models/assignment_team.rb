@@ -134,7 +134,8 @@ class AssignmentTeam < Team
     end     
     
     if currTeam == nil
-       currTeam = AssignmentTeam.create(:name => name, :parent_id => id)
+      # E726 Fall2012 - Added the third parameter to .create so that reviews_rem gets populated even while importing files
+       currTeam = AssignmentTeam.create(:name => name, :parent_id => id, :reviews_rem => Assignment.find(id).review_topic_threshold)
        parent = AssignmentNode.find_by_node_object_id(id)
        TeamNode.create(:parent_id => parent.id, :node_object_id => currTeam.id)
     end

@@ -69,7 +69,10 @@ class Assignment < ActiveRecord::Base
     # has to be captured by the caller (in review_mapping_controller)
     contributor = contributor_to_review(reviewer, topic)
     # E726 Fall2012 Change Begin
-    contributor.reviews_rem -= 1
+    if self.review_assignment_strategy == RS_AUTO_SELECTED
+      contributor.reviews_rem -= 1
+      contributor.save
+    end
     # E726 Fall2012 Change Begin
     contributor.assign_reviewer(reviewer)
   end
@@ -96,7 +99,7 @@ class Assignment < ActiveRecord::Base
       signed_up_topic(contributor) != topic or # both will be nil for assignments with no signup sheet
         contributor.includes?(reviewer) or
         !contributor.has_submissions? or
-          contributor.reviews_rem.nil?   # E726 Fall2012 Change - To remove the contributor
+         (self.review_assignment_strategy == RS_AUTO_SELECTED and contributor.reviews_rem == 0)   # E726 Fall2012 Change - To remove the contributor
                                          #for which the maximum number of reviews
                                          #have been reached
     end
