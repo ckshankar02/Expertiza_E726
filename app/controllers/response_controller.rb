@@ -447,9 +447,13 @@ class ResponseController < ApplicationController
   
   def create
     @map = ResponseMap.find(params[:id])
-
+    if params[:from_teammate_review] == "yes"
+        from_teammate_review_flag = "yes"
+    else
+      from_teammate_review_flag = "no"
+    end
 #******************* E726 Changes Starts Here ********************************
-  if params[:from_teammate_review] == "yes"
+  if from_teammate_review_flag == "yes"
       is_role_based_review = params[:is_role_based]
       if is_role_based_review == "YES"
         @role_map = ResponseMap.find(params[:role_map_id])
@@ -476,7 +480,7 @@ class ResponseController < ApplicationController
       end
 
 #*********************** E726 Changes Starts Here *********************************
-  if params[:from_teammate_review] == "yes"
+  if from_teammate_review_flag == "yes"
       array_not_empty = 0
       @sorted_role_array = Array.new
       if is_role_based_review == "YES"
@@ -507,7 +511,7 @@ class ResponseController < ApplicationController
 
 #**************************** E726 Changes Starts Here ****************************
 #if previous responses exist increment the version number.
-    if params[:from_teammate_review] == "yes"
+    if from_teammate_review_flag == "yes"
       if is_role_based_review == "YES"
         if role_array_not_empty == 1
           @sorted_role = @sorted_role_array.sort {|m1,m2|(m1.version_num and m2.version_num) ? m2.version_num <=> m1.version_num : (m1.version_num ? -1 : 1)}
@@ -547,7 +551,7 @@ class ResponseController < ApplicationController
 
 #********************** E726 Changes Starts Here ***********************************
 #The review scores are captured by the below code on to the score table.
-  if params[:from_teammate_review] == "yes"
+  if from_teammate_review_flag == "yes"
       if is_role_based_review == "YES"
         @role_response = Response.create(:map_id => @role_map.id, :additional_comment => params[:review_role][:comments],:version_num=>@role_version)
         @role_res = @role_response.id
@@ -572,7 +576,7 @@ class ResponseController < ApplicationController
 
 #********************** E726 Changes Starts Here ********************************
 # For the role based review made a score cache entry is made.
-  if params[:from_teammate_review] == "yes"
+  if from_teammate_review_flag == "yes"
       if is_role_based_review == "YES"
         ResponseHelper.compare_scores(@role_response, @role_questionnaire)
         ScoreCache.update_cache(@role_res)
@@ -586,7 +590,7 @@ class ResponseController < ApplicationController
       @response.delete
 
 #*********************** E726 Changes Starts Here *******************************
-  if params[:from_teammate_review] == "yes"
+  if from_teammate_review_flag == "yes"
       if is_role_based_review == "YES"
         @role_response.delete
       end
