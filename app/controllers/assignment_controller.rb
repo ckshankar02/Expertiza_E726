@@ -254,6 +254,7 @@ class AssignmentController < ApplicationController
 
   def edit
     @assignment = Assignment.find(params[:id])
+    @prev_review_topic_threshold = @assignment.review_topic_threshold
     prepare_to_edit
   end
 
@@ -397,6 +398,21 @@ class AssignmentController < ApplicationController
         set_questionnaires
         set_limits_and_weights
       end
+      # E726 Fall2012 Change Begin
+      # update the reviews_rem field of participants and team table only if the topic threshold has changed
+      if params[:prev_review_topic_threshold].to_i != @assignment.review_topic_threshold
+        teams = Team.find_all_by_parent_id(@assignment.id)
+        teams.each do |team|
+          team.reviews_rem = @assignment.review_topic_threshold
+          team.save
+        end
+        participants = Participant.find_all_by_parent_id(@assignment.id)
+        participants.each do |participant|
+          participant.reviews_rem = @assignment.review_topic_threshold
+          participant.save
+        end
+      end
+      # E726 Fall2012 Change Begin
 
       begin
         newpath = @assignment.get_path
